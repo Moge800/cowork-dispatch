@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 import subprocess
 
@@ -11,7 +12,14 @@ from cowork_dispatch.ollama_client import OllamaClient, OllamaError
 config = load_config()
 client = OllamaClient(config)
 mcp = FastMCP("cowork-dispatch", instructions="Use local delegate tools for bounded coding tasks and verification.")
-WORKSPACE_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_WORKSPACE_ROOT = Path(__file__).resolve().parents[2]
+
+
+def workspace_root() -> Path:
+    configured_root = os.getenv("COWORK_WORKSPACE_ROOT")
+    if configured_root:
+        return Path(configured_root).expanduser().resolve()
+    return DEFAULT_WORKSPACE_ROOT
 
 
 @mcp.tool()
@@ -29,7 +37,7 @@ def run_pytest() -> str:
     """Run the workspace test suite with uv and return the output."""
     result = subprocess.run(
         ["uv", "run", "pytest"],
-        cwd=WORKSPACE_ROOT,
+        cwd=workspace_root(),
         capture_output=True,
         text=True,
         check=False,

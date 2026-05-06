@@ -36,3 +36,16 @@ def test_run_pytest_uses_uv(monkeypatch) -> None:
     monkeypatch.setattr("cowork_dispatch.server.subprocess.run", fake_run)
 
     assert run_pytest() == "2 passed"
+
+
+def test_run_pytest_uses_configured_workspace_root(monkeypatch, tmp_path) -> None:
+    monkeypatch.setenv("COWORK_WORKSPACE_ROOT", str(tmp_path))
+
+    def fake_run(command: list[str], cwd, capture_output: bool, text: bool, check: bool, stdin):
+        assert command == ["uv", "run", "pytest"]
+        assert cwd == tmp_path.resolve()
+        return subprocess.CompletedProcess(command, 0, stdout="ok\n", stderr="")
+
+    monkeypatch.setattr("cowork_dispatch.server.subprocess.run", fake_run)
+
+    assert run_pytest() == "ok"

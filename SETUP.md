@@ -39,11 +39,46 @@ uv run cowork-dispatch
 利用中の Copilot Chat / agent mode の MCP 登録方法に合わせて、このサーバーを stdio コマンドで登録します。
 
 - command: uv
-- args: run, cowork-dispatch
+- args: run, --link-mode, copy, cowork-dispatch
 - env file: .env
 - env: OLLAMA_HOST, OLLAMA_MODEL, OLLAMA_TIMEOUT_SECONDS
 
 このリポジトリには VS Code 用の例として `.vscode/mcp.json` を含めています。必要に応じて `.env.example` を `.env` にコピーし、モデル名やタイムアウトを変更してください。
+
+`command` は `uv` を指定します。`uvx` や `uv tool run` を使うと、`run` が uv のサブコマンドではなくパッケージ名として解釈され、`Package 'run' does not provide any executables.` のようなエラーになることがあります。
+
+## 他のワークスペースから使う
+
+このリポジトリの `.vscode/mcp.json` は、`cowork-dispatch` リポジトリ自身で使うための設定です。他のプロジェクトへそのままコピーすると、コピー先のワークスペースで `uv run cowork-dispatch` を探すため、コマンドが見つからないことがあります。
+
+他のプロジェクトから中央の `cowork-dispatch` リポジトリを使う場合は、コピー先プロジェクトの `.vscode/mcp.json` を次のようにします。`/path/to/cowork-dispatch` は自分の配置場所に合わせて変更してください。
+
+```json
+{
+	"servers": {
+		"cowork-dispatch": {
+			"type": "stdio",
+			"command": "uv",
+			"args": [
+				"--directory",
+				"/path/to/cowork-dispatch",
+				"run",
+				"--link-mode",
+				"copy",
+				"cowork-dispatch"
+			],
+			"envFile": "${workspaceFolder}/.env",
+			"env": {
+				"COWORK_WORKSPACE_ROOT": "${workspaceFolder}"
+			}
+		}
+	}
+}
+```
+
+`envFile` はコピー先プロジェクトの `.env` を読みます。`COWORK_WORKSPACE_ROOT` は `run_pytest` がどのワークスペースで `uv run pytest` を実行するかを指定します。
+
+手元のターミナルで `uv run cowork-dispatch` を起動しているだけでは、別ワークスペースの Copilot には MCP サーバーとして接続されません。使いたいワークスペースごとに MCP 設定を登録してください。
 
 ## 公開ツール
 
