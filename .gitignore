@@ -1,0 +1,12 @@
+.venv/
+.env
+.claude/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+build/
+dist/
+*.egg-info/
+.plan/
+.vscode/*
+!.vscode/mcp.json

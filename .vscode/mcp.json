@@ -1,0 +1,10 @@
+{
+    "servers": {
+      "cowork-dispatch": {
+        "type": "stdio",
+        "command": "uv",
+        "args": ["run", "cowork-dispatch"],
+        "envFile": "${workspaceFolder}/.env"
+      }
+    }
+  }
